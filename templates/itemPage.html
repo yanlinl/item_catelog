@@ -1,0 +1,15 @@
+<html>
+
+<body>
+    <a href="{{url_for('categoriesPage')}}">Main Page</a>
+    <div>
+        <h1>{{item.name}} <a href="{{url_for('itemsPage', categories_id=item.categories.id)}}">({{item.categories.name}})</a>
+        </h1>
+        <a href="{{url_for('editItems', categories_id=item.categories.id, items_id=item.id)}}">Edit Item</a>
+        <br>
+        <a href="{{url_for('deleteItems', categories_id=item.categories.id, item_id=item.id)}}">Delete Item</a>
+        <p>{{item.description}}</p>
+    </div>
+</body>
+
+</html>

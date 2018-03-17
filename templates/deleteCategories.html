@@ -1,0 +1,15 @@
+<html>
+
+    <body>
+        <h1> Are you sure you want to delete {{deleteCategorie.name}}? </h1>
+        <p>WARNING: ALL ITEMS UNDER THIS CATEGORY WILL BE DELETED AS WELL</p>
+        <form action="#" method = 'post'>
+
+        <input type='submit', value = 'Delete'>
+
+        </form>
+
+        <a href = "{{url_for('categoriesPage')}}"> Cancel </a>
+    </body>
+
+</html>

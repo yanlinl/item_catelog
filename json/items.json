@@ -1,0 +1,35 @@
+{
+    "_comment": "Initial data for items",
+    "items": [
+    {
+        "name": "itetm1",
+        "description": "balalal",
+        "categories": "basketball"
+    },
+    {
+        "name": "itetm2",
+        "description": "balalal",
+        "categories": "football"
+    },
+    {
+        "name": "item3",
+        "description": "balalal",
+        "categories": "soccer"
+    },
+    {
+        "name": "itetm4",
+        "description": "",
+        "categories": "vollyball"
+    },
+    {
+        "name": "itetm5",
+        "description": "balalal",
+        "categories": "snowboard"
+    },
+    {
+        "name": "itetm6",
+        "description": "balalal",
+        "categories": "basketball"
+    }
+    ]
+}

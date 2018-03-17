@@ -1,0 +1,20 @@
+{
+    "_comment": "Initial data for categories",
+    "categories": [
+    {
+        "name": "basketball"
+    },
+    {
+        "name": "football"
+    },
+    {
+        "name": "soccer"
+    },
+    {
+        "name": "vollyball"
+    },
+    {
+        "name": "snowboard"
+    }
+    ]
+}

@@ -1,0 +1,29 @@
+<html>
+<head>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header class="header"><a href="{{url_for('categoriesPage')}}">Main Page</a></header>
+    <div class="row">
+        <div class="column left">
+            <h1>Categories</h1>
+            <a href="{{url_for('newCategories')}}">Create new Categories</a>
+            <br><br><br>
+            {% for i in categories %}
+            <div>
+                <a href="{{url_for('itemsPage', categories_id=i.id)}}">{{i.name}}</a>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="column right">
+            <h1>Latest 10 items</h1>
+            {% for i in latest_10 %}
+            <div>
+                <a href="{{url_for('itemPage', categories_id=i.categories.id, item_id=i.id)}}">{{i.name}}({{i.categories.name}})</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+
+</html>

@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, UniqueConstraint
 
 Base = declarative_base()
 
-
+# Setup table for categories
 class Categories(Base):
     __tablename__ = 'categories'
 
@@ -23,6 +23,7 @@ class Categories(Base):
         }
 
 
+# Setup table for items
 class Items(Base):
     __tablename__ = 'items'
 
@@ -42,8 +43,7 @@ class Items(Base):
             'id': self.id,
         }
 
-
+# Create data engine
 engine = create_engine('sqlite:///categories.db')
-
 
 Base.metadata.create_all(engine)

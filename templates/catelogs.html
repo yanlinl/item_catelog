@@ -3,7 +3,14 @@
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <header class="header"><a href="{{url_for('categoriesPage')}}">Main Page</a></header>
+    <header class="header">
+        <a href="{{url_for('categoriesPage')}}">Main Page</a>
+        {%if 'username' not in session %}
+        <button type="button" href="{{url_for('showLogin')}}">Click Here to Login </button>
+        {% else %}
+        <button type="button" href="{{url_for('gdisconnect')}}">Logout </button>
+        {% endif %}
+    </header>
     <div class="row">
         <div class="column left">
             <h1>Categories</h1>

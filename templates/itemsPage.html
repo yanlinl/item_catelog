@@ -1,7 +1,16 @@
 <html>
 
 <body>
+
+    <header class="header">
     <a href="{{url_for('categoriesPage')}}">Main Page</a>
+    {%if 'username' not in session %}
+    <button type="button" href="{{url_for('showLogin')}}">Click Here to Login </button>
+    {% else %}
+    <button type="button" href="{{url_for('gdisconnect')}}">Logout </a>
+    {% endif %}
+    </button>
+
     <h1>Categories</h1>
     {% for i in categories %}
     <div>

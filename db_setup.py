@@ -13,6 +13,7 @@ class Categories(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False, unique=True)
+    user_id = Column(String(80), nullable=False)
 
     @property
     def serialize(self):
@@ -31,6 +32,7 @@ class Items(Base):
     id = Column(Integer, primary_key=True)
     description = Column(String(250))
     categories_id = Column(Integer, ForeignKey('categories.id'), nullable=False)
+    user_id = Column(String(80), nullable=False)
     categories = relationship(Categories)
     __table_args__ = (UniqueConstraint('name', 'categories_id'),)
 

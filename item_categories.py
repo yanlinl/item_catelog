@@ -37,19 +37,34 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
-# Display more all categories and most recent added items.
+def login_required(function):
+    def wrapper():
+        if 'username' in login_session:
+            function()
+        else:
+            response = make_response(json.dumps("A user must be logged to add a new item."), 401)
+            return response
+    wrapper.func_name = function.func_name
+    return wrapper
+
+
 @app.route('/')
 @app.route('/categories/')
 def categoriesPage():
+    '''
+        Display more all categories and most recent added items.
+    '''
     categories = session.query(Categories).all()
     latest_10 = session.query(Items).order_by(Items.id.desc()).limit(10)
     return render_template("catelogs.html",
                            categories=categories, latest_10=latest_10)
 
 
-# Display all items in acategories.
 @app.route('/categories/<int:categories_id>/')
 def itemsPage(categories_id):
+    '''
+        Display all items in acategories.
+    '''
     categories = session.query(Categories).all()
     items_list = session.query(Items).filter_by(
         categories_id=categories_id).all()
@@ -60,20 +75,25 @@ def itemsPage(categories_id):
                            items_list=items_list)
 
 
-# Display an item
 @app.route('/categories/<int:categories_id>/<int:item_id>/')
 def itemPage(categories_id, item_id):
+    '''
+        Display an item
+    '''
     item = session.query(Items).filter_by(categories_id=categories_id).first()
     return render_template("itemPage.html", item=item)
 
 
-# Create new categories
 @app.route('/categories/newCategories/', methods=['GET', 'POST'])
 def newCategories():
+    '''
+        Create new categories
+    '''
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
-        newCategorie = Categories(name=request.form['name'])
+        newCategorie = Categories(name=request.form['name'],
+                                user_id=login_session['gplus_id'])
         session.add(newCategorie)
         session.commit()
         return redirect(url_for('categoriesPage'))
@@ -81,9 +101,11 @@ def newCategories():
         return render_template('newCatelogs.html')
 
 
-# Create new items
 @app.route('/categories/<int:categories_id>/newItem/', methods=['GET', 'POST'])
 def newItem(categories_id):
+    '''
+        Create new items
+    '''
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
@@ -91,7 +113,8 @@ def newItem(categories_id):
             name=request.form['name'],
             description=request.form['description'],
             categories=session.query(
-                Categories).filter_by(id=categories_id).first())
+                Categories).filter_by(id=categories_id).first(),
+                user_id=login_session['gplus_id'])
         session.add(newCategorie)
         session.commit()
         return redirect(url_for('itemsPage', categories_id=categories_id))
@@ -99,12 +122,16 @@ def newItem(categories_id):
         return render_template('newItem.html', categories_id=categories_id)
 
 
-# update a categories name
 @app.route('/categories/<int:categories_id>/edit/', methods=['GET', 'POST'])
 def editCategories(categories_id):
+    '''
+        Update a categories name
+    '''
     if 'username' not in login_session:
         return redirect('/login')
     editCate = session.query(Categories).filter_by(id=categories_id).one()
+    if(editCate.user_id != login_session['gplus_id']):
+        return "<script>function myFunction() {alert('You are not authorized to edit this restaurant. Please create your own restaurant in order to edit.');}</script><body onload='myFunction()'>"
     if request.method == 'POST':
         if request.form['name']:
             editCate.name = request.form['name']
@@ -116,13 +143,17 @@ def editCategories(categories_id):
         return render_template('editCategories.html', editCategories=editCate)
 
 
-# update an item
 @app.route('/categories/<int:categories_id>/<int:items_id>/edit/',
            methods=['GET', 'POST'])
 def editItems(categories_id, items_id):
+    '''
+        update an item
+    '''
     if 'username' not in login_session:
         return redirect('/login')
     editItem = session.query(Items).filter_by(id=items_id).one()
+    if(editItem.user_id != login_session['gplus_id']):
+        return "<script>function myFunction() {alert('You are not authorized to edit this restaurant. Please create your own restaurant in order to edit.');}</script><body onload='myFunction()'>"
     if request.method == 'POST':
         if request.form['name']:
             editItem.name = request.form['name']
@@ -136,13 +167,17 @@ def editItems(categories_id, items_id):
         return render_template('editItem.html', editItem=editItem)
 
 
-# delete a categories
 @app.route('/categories/<int:categories_id>/delete/', methods=['GET', 'POST'])
 def deleteCategories(categories_id):
+    '''
+        delete a categories
+    '''
     if 'username' not in login_session:
         return redirect('/login')
     deleteCategorie = session.query(
         Categories).filter_by(id=categories_id).one()
+    if(deleteCategorie.user_id != login_session['gplus_id']):
+        return "<script>function myFunction() {alert('You are not authorized to edit this restaurant. Please create your own restaurant in order to edit.');}</script><body onload='myFunction()'>"
     if request.method == 'POST':
         deleteItems = session.query(Items).filter_by(
             categories=deleteCategorie).all()
@@ -157,57 +192,70 @@ def deleteCategories(categories_id):
                                deleteCategorie=deleteCategorie)
 
 
-# Delete an item
 @app.route('/categories/<int:categories_id>/<int:item_id>/delete/',
            methods=['GET', 'POST'])
 def deleteItems(categories_id, item_id):
+    '''
+        Delete an item
+    '''
     if 'username' not in login_session:
         return redirect('/login')
     deleteItem = session.query(Items).filter_by(id=item_id).one()
+    if(deleteItem.user_id != login_session['gplus_id']):
+        return "<script>function myFunction() {alert('You are not authorized to edit this restaurant. Please create your own restaurant in order to edit.');}</script><body onload='myFunction()'>"
     if request.method == 'POST':
         cat_id = deleteItem.categories.id
         session.delete(deleteItem)
         session.commit()
-        print "bere"
         return redirect(url_for('itemsPage', categories_id=cat_id))
     else:
         return render_template('deleteItem.html', deleteItem=deleteItem)
 
 
-# Create json view for all items in a categories
 @app.route('/categories/<int:categories_id>/JSON/')
 def itemCategoriesJSON(categories_id):
+    '''
+        Create json view for all items in a categories
+    '''
     categories = session.query(Categories).filter_by(id=categories_id).one()
     items = session.query(Items).filter_by(categories=categories).all()
     return jsonify(Items=[i.serialize for i in items])
 
 
-# Create json view for an item
 @app.route('/categories/<int:categories_id>/<int:items_id>/JSON')
 def itemsJSON(categories_id, items_id):
+    '''
+        Create json view for an item
+    '''
     item = session.query(Items).filter_by(id=items_id).one()
     return jsonify(items=item.serialize)
 
 
-# Create json view for all categories
 @app.route('/categories/JSON/')
 def categoriesJSON():
+    '''
+        Create json view for all categories
+    '''
     categories = session.query(Categories).all()
     return jsonify(Categories=[i.serialize for i in categories])
 
 
-# Allow user to login via google
 @app.route('/login')
 def showLogin():
+    '''
+        Allow user to login via google
+    '''
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
                     for x in xrange(32))
     login_session['state'] = state
     return render_template('login.html', STATE=state)
 
 
-# Gconnect code
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    '''
+        Gconnect code
+    '''
     # Validate state token
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
@@ -294,9 +342,11 @@ def gconnect():
     return output
 
 
-# disconnect from google login.
 @app.route('/gdisconnect')
 def gdisconnect():
+    '''
+        disconnect from google login.
+    '''
     access_token = login_session.get('access_token')
     if access_token is None:
         print 'Access Token is None'
@@ -307,12 +357,14 @@ def gdisconnect():
     print 'In gdisconnect access token is %s', access_token
     print 'User name is: '
     print login_session['username']
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s'
-    url = url % login_session['access_token']
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+    print url
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     print 'result is '
     print result
+    print 'login_session is: '
+    print login_session
     if result['status'] == '200':
         del login_session['access_token']
         del login_session['gplus_id']

@@ -7,6 +7,7 @@ from sqlalchemy import create_engine, UniqueConstraint
 
 Base = declarative_base()
 
+
 # Setup table for categories
 class Categories(Base):
     __tablename__ = 'categories'
@@ -31,7 +32,9 @@ class Items(Base):
     name = Column(String(80), nullable=False)
     id = Column(Integer, primary_key=True)
     description = Column(String(250))
-    categories_id = Column(Integer, ForeignKey('categories.id'), nullable=False)
+    categories_id = Column(Integer,
+                           ForeignKey('categories.id'),
+                           nullable=False)
     user_id = Column(String(80), nullable=False)
     categories = relationship(Categories)
     __table_args__ = (UniqueConstraint('name', 'categories_id'),)

@@ -22,7 +22,7 @@ def createItem(item):
     cat = session.query(Categories).filter_by(name=item["categories"]).first()
     cate_item = Items(name=item["name"],
                       description=item["description"],
-                      categories=cat, user_id ="111833695591203102879")
+                      categories=cat, user_id="111833695591203102879")
     return cate_item
 
 # connect to database

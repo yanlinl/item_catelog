@@ -42,7 +42,10 @@ def login_required(function):
         if 'username' in login_session:
             function()
         else:
-            response = make_response(json.dumps("A user must be logged to add a new item."), 401)
+            response = make_response(
+                    json.dumps("A user must be logged to add a new item."),
+                    401
+                )
             return response
     wrapper.func_name = function.func_name
     return wrapper
@@ -92,9 +95,11 @@ def newCategories():
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
-        newCategorie = Categories(name=request.form['name'],
-                                user_id=login_session['gplus_id'])
-        session.add(newCategorie)
+        new = Categories(
+            name=request.form['name'],
+            user_id=login_session['gplus_id']
+        )
+        session.add(new)
         session.commit()
         return redirect(url_for('categoriesPage'))
     else:
@@ -112,9 +117,9 @@ def newItem(categories_id):
         newCategorie = Items(
             name=request.form['name'],
             description=request.form['description'],
-            categories=session.query(
-                Categories).filter_by(id=categories_id).first(),
-                user_id=login_session['gplus_id'])
+            categories=session.query(Categories). filter_by(
+                id=categories_id).first(), user_id=login_session['gplus_id']
+            )
         session.add(newCategorie)
         session.commit()
         return redirect(url_for('itemsPage', categories_id=categories_id))
@@ -131,7 +136,11 @@ def editCategories(categories_id):
         return redirect('/login')
     editCate = session.query(Categories).filter_by(id=categories_id).one()
     if(editCate.user_id != login_session['gplus_id']):
-        return "<script>function myFunction() {alert('You are not authorized to edit this restaurant. Please create your own restaurant in order to edit.');}</script><body onload='myFunction()'>"
+        script = "<script>function myFunction() {alert('You are not authorized"
+        script += "to edit this restaurant. Please create your own restaurant"
+        script += "in order to edit.');}</script><body"
+        script += "onload='myFunction()'>"
+        return script
     if request.method == 'POST':
         if request.form['name']:
             editCate.name = request.form['name']
@@ -153,7 +162,11 @@ def editItems(categories_id, items_id):
         return redirect('/login')
     editItem = session.query(Items).filter_by(id=items_id).one()
     if(editItem.user_id != login_session['gplus_id']):
-        return "<script>function myFunction() {alert('You are not authorized to edit this restaurant. Please create your own restaurant in order to edit.');}</script><body onload='myFunction()'>"
+        script = "<script>function myFunction() {alert('You are not authorized"
+        script += "to edit this restaurant. Please create your own restaurant"
+        script += "in order to edit.');}</script><body"
+        script += "onload='myFunction()'>"
+        return script
     if request.method == 'POST':
         if request.form['name']:
             editItem.name = request.form['name']
@@ -177,7 +190,11 @@ def deleteCategories(categories_id):
     deleteCategorie = session.query(
         Categories).filter_by(id=categories_id).one()
     if(deleteCategorie.user_id != login_session['gplus_id']):
-        return "<script>function myFunction() {alert('You are not authorized to edit this restaurant. Please create your own restaurant in order to edit.');}</script><body onload='myFunction()'>"
+        script = "<script>function myFunction() {alert('You are not authorized"
+        script += "to edit this restaurant. Please create your own restaurant"
+        script += "in order to edit.');}</script><body"
+        script += "onload='myFunction()'>"
+        return script
     if request.method == 'POST':
         deleteItems = session.query(Items).filter_by(
             categories=deleteCategorie).all()
@@ -202,7 +219,11 @@ def deleteItems(categories_id, item_id):
         return redirect('/login')
     deleteItem = session.query(Items).filter_by(id=item_id).one()
     if(deleteItem.user_id != login_session['gplus_id']):
-        return "<script>function myFunction() {alert('You are not authorized to edit this restaurant. Please create your own restaurant in order to edit.');}</script><body onload='myFunction()'>"
+        script = "<script>function myFunction() {alert('You are not authorized"
+        script += "to edit this restaurant. Please create your own restaurant"
+        script += "in order to edit.');}</script><body"
+        script += "onload='myFunction()'>"
+        return script
     if request.method == 'POST':
         cat_id = deleteItem.categories.id
         session.delete(deleteItem)
@@ -260,7 +281,6 @@ def gconnect():
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
         response.headers['Content-Type'] = 'application/json'
-        print response
         return response
     # Obtain authorization code
     code = request.data
@@ -354,17 +374,9 @@ def gdisconnect():
             'Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
-    print 'In gdisconnect access token is %s', access_token
-    print 'User name is: '
-    print login_session['username']
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
-    print url
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
-    print 'result is '
-    print result
-    print 'login_session is: '
-    print login_session
     if result['status'] == '200':
         del login_session['access_token']
         del login_session['gplus_id']
